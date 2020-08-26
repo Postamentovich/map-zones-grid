@@ -1,0 +1,35 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: "Roboto", sans-serif;
+}
+
+.app {
+    &__nav {
+        background-color: #ddd;
+    }
+
+    &__nav-list {
+        margin: 0;
+        list-style: none;
+        display: flex;
+        padding: 10px 20px;
+    }
+    &__nav-item {
+        display: block;
+        margin-right: 20px;
+        color: Black;
+        text-decoration: none;
+        padding: 10px;
+
+        &_active {
+            background-color: gold;
+            color: Black;
+            font-weight: bold;
+        }
+    }
+}
