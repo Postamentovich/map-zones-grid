@@ -9,8 +9,15 @@ body {
 }
 
 .app {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
     &__nav {
+        display: flex;
+        flex: 1;
         background-color: #ddd;
+        border-bottom: 1px solid black;
     }
 
     &__nav-list {
@@ -29,7 +36,11 @@ body {
         &_active {
             background-color: gold;
             color: Black;
-            font-weight: bold;
         }
+    }
+
+    &__page {
+        display: flex;
+        flex: 999;
     }
 }

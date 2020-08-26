@@ -59,21 +59,23 @@ export const App = () => {
                         </li>
                     </ul>
                 </nav>
-                <Switch>
-                    <Route path={routes.areaMap}>
-                        <AreaMapPage />
-                    </Route>
-                    <Route path={routes.areaIdentification}>
-                        <AreaIdentificationPage />
-                    </Route>
-                    <Route path={routes.gridIdentification}>
-                        <GridIdentificationPage />
-                    </Route>
-                    <Route path={routes.gridMap}>
-                        <GridMapPage />
-                    </Route>
-                    <Redirect to={routes.areaMap} />
-                </Switch>
+                <div className={`${baseClass}__page`}>
+                    <Switch>
+                        <Route path={routes.areaMap}>
+                            <AreaMapPage />
+                        </Route>
+                        <Route path={routes.areaIdentification}>
+                            <AreaIdentificationPage />
+                        </Route>
+                        <Route path={routes.gridIdentification}>
+                            <GridIdentificationPage />
+                        </Route>
+                        <Route path={routes.gridMap}>
+                            <GridMapPage />
+                        </Route>
+                        <Redirect to={routes.areaMap} />
+                    </Switch>
+                </div>
             </div>
         </Router>
     );
