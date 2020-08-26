@@ -5,7 +5,7 @@ import "./index.scss";
 export const AreaMapPage = () => {
     return (
         <div className="area-page">
-            <Map />
+            <Map withGeoman />
         </div>
     );
 };

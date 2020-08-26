@@ -1,13 +1,15 @@
 import React, { useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "@geoman-io/leaflet-geoman-free";
+import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import "./index.scss";
 
 const mapId = "leaflet-map-id";
 
-export const Map = () => {
+export const Map = ({ withGeoman = false }) => {
     useEffect(() => {
-        const mymap = L.map(mapId).setView([47.57652571374621, 14.3316650390625], 8);
+        const map = L.map(mapId).setView([47.57652571374621, 14.3316650390625], 8);
         const accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
         L.tileLayer(`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${accessToken}`, {
             attribution:
@@ -17,8 +19,16 @@ export const Map = () => {
             tileSize: 512,
             zoomOffset: -1,
             accessToken,
-        }).addTo(mymap);
-    }, []);
+        }).addTo(map);
+        if (withGeoman) {
+            map.pm.addControls({
+                position: "topleft",
+                drawMarker: false,
+                drawCircleMarker: false,
+                drawPolyline: false
+            });
+        }
+    }, [withGeoman]);
 
     return <div id={mapId} />;
 };
