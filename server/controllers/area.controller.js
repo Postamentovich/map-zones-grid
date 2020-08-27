@@ -16,7 +16,7 @@ class AreaController {
             const coordinates = await this.service.getCoordinates();
             const areas = await this.service.getList();
             const list = this.mapCoordinatesToArea(coordinates, areas);
-            res.json(list);
+            res.status(200).json(list);
         } catch (error) {
             res.status(500);
         }

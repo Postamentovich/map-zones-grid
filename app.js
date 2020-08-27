@@ -5,6 +5,7 @@ const path = require("path");
 const app = express();
 app.use(express.json({ extended: true }));
 app.use("/api/area", require("./server/routes/area.routes"));
+app.use("/api/zone", require("./server/routes/zone.routes"));
 
 if (process.env.NODE_ENV === "production") {
     app.use("/", express.static(path.join(__dirname, "build")));

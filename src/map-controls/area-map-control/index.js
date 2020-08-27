@@ -28,6 +28,7 @@ export class AreaMapControl extends L.Control {
     };
 
     onSave = () => {
+        // const model = {};
         console.log("save");
     };
 
