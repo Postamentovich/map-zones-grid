@@ -15,6 +15,11 @@ export async function updateArea(area) {
     return data;
 }
 
+export async function deleteArea(id) {
+    const { data } = await axios.delete(`/api/area/${id}`);
+    return data;
+}
+
 let cachZones = null;
 export async function getZones() {
     if (cachZones) return cachZones;

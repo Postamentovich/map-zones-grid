@@ -58,7 +58,19 @@ class AreaService {
         });
     }
 
-    async delete(id) {}
+    async delete(areaId) {
+        return new Promise((res, rej) => {
+            const sqlDeleteCoordinates = `DELETE FROM cp_program_zone_gis_coordinates WHERE id_gis = ${areaId}`;
+            this.connection.query(sqlDeleteCoordinates, (error, results) => {
+                if (error) rej(error);
+                const sqlDeleteArea = `DELETE FROM cp_program_zone_gis WHERE id = ${areaId}`;
+                this.connection.query(sqlDeleteArea, (error, results) => {
+                    res(results);
+                    if (error) rej(error);
+                });
+            });
+        });
+    }
 
     async getCoordinates() {
         return new Promise((res, rej) => {

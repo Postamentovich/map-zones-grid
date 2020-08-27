@@ -28,6 +28,7 @@ export const Map = ({ withGeoman = false }) => {
                 drawMarker: false,
                 drawCircleMarker: false,
                 drawPolyline: false,
+                cutPolygon: false,
             });
             map.addControl(areaMapControl);
         }

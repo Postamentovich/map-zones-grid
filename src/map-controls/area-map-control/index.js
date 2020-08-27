@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import L from "leaflet";
 import { MapAreaPopup } from "../../components/map-area-popup";
 import { getCenterZoneByGeometry } from "../../utils/map-utils";
-import { getAreas, createArea, updateArea } from "../../api";
+import { getAreas, createArea, updateArea, deleteArea } from "../../api";
 
 export class AreaMapControl extends L.Control {
     activeModel = null;
@@ -21,13 +21,13 @@ export class AreaMapControl extends L.Control {
         }
     }
 
-    onCancel = () => {
+    onCancelArea = () => {
         this.popup.remove();
         this.activeModel.layer.remove();
         this.activeModel = null;
     };
 
-    onSave = async (zoneId) => {
+    onSaveArea = async (zoneId) => {
         const shape = this.activeModel.shape === "Rectangle" ? "Polygon" : this.activeModel.shape;
         const coordinates =
             this.activeModel.shape === "Circle"
@@ -53,10 +53,10 @@ export class AreaMapControl extends L.Control {
             .setLatLng(center)
             .setContent(popupContainer)
             .openOn(this.map);
-        ReactDOM.render(<MapAreaPopup onCancel={this.onCancel} onSave={this.onSave} />, popupContainer);
+        ReactDOM.render(<MapAreaPopup onCancel={this.onCancelArea} onSave={this.onSaveArea} />, popupContainer);
     };
 
-    onCreate = (e) => {
+    onCreateArea = (e) => {
         const permissionShapes = ["Rectangle", "Polygon", "Circle"];
         if (!permissionShapes.includes(e.shape)) return;
         this.activeModel = { geometry: null, radius: null, layer: null, center: null, shape: null };
@@ -74,7 +74,8 @@ export class AreaMapControl extends L.Control {
         this.showPopup(this.activeModel.center);
     };
 
-    onEdit = async (area, e) => {
+    onEditArea = async (area, e) => {
+        console.log(e);
         const newModel = {
             ...area,
             coordinates:
@@ -87,8 +88,16 @@ export class AreaMapControl extends L.Control {
         }
     };
 
+    onRemoveArea = async (id) => {
+        try {
+            await deleteArea(id);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     init() {
-        this.map.on("pm:create", this.onCreate);
+        this.map.on("pm:create", this.onCreateArea);
         this.drawAreas();
     }
 
@@ -119,7 +128,11 @@ export class AreaMapControl extends L.Control {
         if (!coor) return;
         const center = [coor.lat, coor.lng];
         const radius = coor.radius;
-        L.circle(center, { radius }).addTo(this.map);
+        L.circle(center, { radius })
+            .addTo(this.map)
+            .on("pm:edit", (e) => this.onEditArea(area, e))
+            .on("pm:cut", (e) => this.onEditArea(area, e))
+            .on("pm:remove", (e) => this.onRemoveArea(area.id, e));
     }
 
     drawPolygon(area) {
@@ -127,6 +140,8 @@ export class AreaMapControl extends L.Control {
         if (!latLngs.length) return;
         L.polygon(latLngs)
             .addTo(this.map)
-            .on("pm:edit", (e) => this.onEdit(area, e));
+            .on("pm:edit", (e) => this.onEditArea(area, e))
+            .on("pm:cut", (e) => this.onEditArea(area, e))
+            .on("pm:remove", (e) => this.onRemoveArea(area.id, e));
     }
 }

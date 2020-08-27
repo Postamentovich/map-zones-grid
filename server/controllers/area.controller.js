@@ -27,7 +27,17 @@ class AreaController {
         }
     };
 
-    delete = async (req, res) => {};
+    delete = async (req, res) => {
+        const { id } = req.params;
+        const areaId = Number(id);
+        if (typeof areaId !== "number") res.sendStatus(400);
+        try {
+            await this.service.delete(areaId);
+            res.sendStatus(200);
+        } catch (error) {
+            res.status(500);
+        }
+    };
 
     getList = async (req, res) => {
         try {
