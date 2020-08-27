@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import L from "leaflet";
 import { MapAreaPopup } from "../../components/map-area-popup";
 import { getCenterZoneByGeometry } from "../../utils/map-utils";
-import { getAreas, createArea } from "../../api";
+import { getAreas, createArea, updateArea } from "../../api";
 
 export class AreaMapControl extends L.Control {
     activeModel = null;
@@ -74,6 +74,19 @@ export class AreaMapControl extends L.Control {
         this.showPopup(this.activeModel.center);
     };
 
+    onEdit = async (area, e) => {
+        const newModel = {
+            ...area,
+            coordinates:
+                area.shape === "Circle" ? [{ ...e.layer._latlng, radius: e.layer._mRadius }] : e.layer._latlngs[0],
+        };
+        try {
+            await updateArea(newModel);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     init() {
         this.map.on("pm:create", this.onCreate);
         this.drawAreas();
@@ -112,6 +125,8 @@ export class AreaMapControl extends L.Control {
     drawPolygon(area) {
         const latLngs = area.coordinates.map((el) => [el.lat, el.lng]);
         if (!latLngs.length) return;
-        L.polygon(latLngs).addTo(this.map);
+        L.polygon(latLngs)
+            .addTo(this.map)
+            .on("pm:edit", (e) => this.onEdit(area, e));
     }
 }

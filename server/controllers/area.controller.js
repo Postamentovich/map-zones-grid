@@ -16,7 +16,16 @@ class AreaController {
         }
     };
 
-    update = async (req, res) => {};
+    update = async (req, res) => {
+        try {
+            const { area } = req.body;
+            if (!area) res.sendStatus(400);
+            this.service.update(area);
+            res.sendStatus(200);
+        } catch (error) {
+            res.status(500);
+        }
+    };
 
     delete = async (req, res) => {};
 

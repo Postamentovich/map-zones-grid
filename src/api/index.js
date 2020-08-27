@@ -10,6 +10,11 @@ export async function createArea(area) {
     return data;
 }
 
+export async function updateArea(area) {
+    const { data } = await axios.put("/api/area", { area });
+    return data;
+}
+
 let cachZones = null;
 export async function getZones() {
     if (cachZones) return cachZones;
