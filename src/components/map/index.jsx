@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { AreaMapControl } from "../../map-controls/area-map-control";
 import "@geoman-io/leaflet-geoman-free";
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import "./index.scss";
-import { AreaMapControl } from "../../controls/area-map-control";
 
 const mapId = "leaflet-map-id";
 

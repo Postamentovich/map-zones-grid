@@ -2,13 +2,12 @@ import React from "react";
 import { Map } from "../../components/map";
 import "./index.scss";
 import { useEffect } from "react";
-import { areaService } from "../../services/area-service";
+import { getAreas } from "../../api";
 
 export const AreaMapPage = () => {
     useEffect(() => {
-        areaService.init();
+        getAreas();
     }, []);
-
     return (
         <div className="area-page">
             <Map withGeoman />

@@ -44,6 +44,9 @@ export class AreaMapControl extends L.Control {
     };
 
     onCreate = (e) => {
+        console.log(e)
+        const permissionShapes = ["Rectangle", "Polygon", "Circle"];
+        if (!permissionShapes.includes(e.shape)) return;
         this.activeModel = { geometry: null, radius: null, layer: null, center: null, shape: null };
         if (e.shape === "Rectangle" || e.shape === "Polygon") {
             const geometry = e.layer._latlngs[0];
