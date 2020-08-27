@@ -9,7 +9,6 @@ class AreaService {
             database: "tmp_program",
         });
         this.connection.connect();
-        // this.getList();
     }
 
     async create(area) {}
@@ -20,7 +19,7 @@ class AreaService {
 
     async getCoordinates() {
         return new Promise((res, rej) => {
-            this.connection.query("SELECT * FROM cp_program_zone_gis_coordinates", function (error, results, fields) {
+            this.connection.query("SELECT * FROM cp_program_zone_gis_coordinates", (error, results) => {
                 if (error) rej(error);
                 res(results);
             });
@@ -29,7 +28,7 @@ class AreaService {
 
     async getList() {
         return new Promise((res, rej) => {
-            this.connection.query("SELECT * FROM cp_program_zone_gis", function (error, results, fields) {
+            this.connection.query("SELECT * FROM cp_program_zone_gis", (error, results) => {
                 if (error) rej(error);
                 res(results);
             });

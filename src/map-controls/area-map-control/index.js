@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import L from "leaflet";
 import { MapAreaPopup } from "../../components/map-area-popup";
 import { getCenterZoneByGeometry } from "../../utils/map-utils";
+import { getAreas } from "../../api";
 
 export class AreaMapControl extends L.Control {
     activeModel = null;
@@ -44,7 +45,7 @@ export class AreaMapControl extends L.Control {
     };
 
     onCreate = (e) => {
-        console.log(e)
+        console.log(e);
         const permissionShapes = ["Rectangle", "Polygon", "Circle"];
         if (!permissionShapes.includes(e.shape)) return;
         this.activeModel = { geometry: null, radius: null, layer: null, center: null, shape: null };
@@ -64,6 +65,42 @@ export class AreaMapControl extends L.Control {
 
     init() {
         this.map.on("pm:create", this.onCreate);
-        L.circle([47.615421267605434, 13.083343505859377], { radius: 16886.22137850406 }).addTo(this.map);
+        this.drawAreas();
+    }
+
+    getAreas = async () => {
+        try {
+            const areas = await getAreas();
+            return areas;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    async drawAreas() {
+        const areas = await this.getAreas();
+        if (!Array.isArray(areas)) return;
+        areas.forEach((area) => {
+            if (area.shape === "Polygon") {
+                this.drawPolygon(area);
+            }
+            if (area.shape === "Circle") {
+                this.drawCircle(area);
+            }
+        });
+        console.log(areas);
+    }
+
+    drawCircle(area) {
+        const coor = area.coordinates[0];
+        if (!coor) return;
+        const center = [coor.lng, coor.lat];
+        const radius = coor.radius;
+        L.circle(center, { radius }).addTo(this.map);
+    }
+
+    drawPolygon(area) {
+        const latLngs = area.coordinates.map((el) => [el.lng, el.lat]);
+        L.polygon(latLngs).addTo(this.map);
     }
 }
