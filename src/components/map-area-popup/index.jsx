@@ -21,7 +21,7 @@ export const MapAreaPopup = ({ onCancel, onSave }) => {
     }, []);
 
     const handleChange = (e) => {
-        setSelectedZone(e.target.value);
+        setSelectedZone(Number(e.target.value));
     };
 
     const handleClickSave = () => {

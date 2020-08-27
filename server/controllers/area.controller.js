@@ -5,7 +5,16 @@ class AreaController {
         this.service = new AreaService();
     }
 
-    create = async (req, res) => {};
+    create = async (req, res) => {
+        try {
+            const { area } = req.body;
+            if (!area) res.sendStatus(400);
+            this.service.create(area);
+            res.sendStatus(201);
+        } catch (error) {
+            res.status(500);
+        }
+    };
 
     update = async (req, res) => {};
 

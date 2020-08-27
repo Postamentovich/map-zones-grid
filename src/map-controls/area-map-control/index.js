@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import L from "leaflet";
 import { MapAreaPopup } from "../../components/map-area-popup";
 import { getCenterZoneByGeometry } from "../../utils/map-utils";
-import { getAreas } from "../../api";
+import { getAreas, createArea } from "../../api";
 
 export class AreaMapControl extends L.Control {
     activeModel = null;
@@ -23,17 +23,28 @@ export class AreaMapControl extends L.Control {
 
     onCancel = () => {
         this.popup.remove();
-        this.deleteActiveZone();
+        this.activeModel.layer.remove();
         this.activeModel = null;
     };
 
-    onSave = () => {
-        // const model = {};
-        console.log("save");
-    };
-
-    deleteActiveZone = () => {
-        this.activeModel.layer.remove();
+    onSave = async (zoneId) => {
+        const shape = this.activeModel.shape === "Rectangle" ? "Polygon" : this.activeModel.shape;
+        const coordinates =
+            this.activeModel.shape === "Circle"
+                ? [{ ...this.activeModel.center, radius: this.activeModel.radius }]
+                : this.activeModel.geometry;
+        const model = {
+            zoneId,
+            shape,
+            coordinates,
+        };
+        try {
+            await createArea(model);
+            this.popup.remove();
+            this.activeModel = null;
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     showPopup = (center) => {
@@ -46,7 +57,6 @@ export class AreaMapControl extends L.Control {
     };
 
     onCreate = (e) => {
-        console.log(e);
         const permissionShapes = ["Rectangle", "Polygon", "Circle"];
         if (!permissionShapes.includes(e.shape)) return;
         this.activeModel = { geometry: null, radius: null, layer: null, center: null, shape: null };
@@ -89,19 +99,19 @@ export class AreaMapControl extends L.Control {
                 this.drawCircle(area);
             }
         });
-        console.log(areas);
     }
 
     drawCircle(area) {
         const coor = area.coordinates[0];
         if (!coor) return;
-        const center = [coor.lng, coor.lat];
+        const center = [coor.lat, coor.lng];
         const radius = coor.radius;
         L.circle(center, { radius }).addTo(this.map);
     }
 
     drawPolygon(area) {
-        const latLngs = area.coordinates.map((el) => [el.lng, el.lat]);
+        const latLngs = area.coordinates.map((el) => [el.lat, el.lng]);
+        if (!latLngs.length) return;
         L.polygon(latLngs).addTo(this.map);
     }
 }
