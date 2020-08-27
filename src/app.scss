@@ -42,5 +42,7 @@ body {
     &__page {
         display: flex;
         flex: 999;
+        align-items: center;
+        justify-content: center;
     }
 }
