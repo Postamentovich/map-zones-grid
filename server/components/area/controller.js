@@ -1,4 +1,4 @@
-const { AreaService } = require("../services/area.service");
+const { AreaService } = require("./service");
 
 class AreaController {
     constructor() {
@@ -9,8 +9,8 @@ class AreaController {
         try {
             const { area } = req.body;
             if (!area) res.sendStatus(400);
-            this.service.create(area);
-            res.sendStatus(201);
+            const zoneId = await this.service.create(area);
+            res.status(200).json(zoneId);
         } catch (error) {
             res.status(500);
         }
@@ -20,7 +20,7 @@ class AreaController {
         try {
             const { area } = req.body;
             if (!area) res.sendStatus(400);
-            this.service.update(area);
+            await this.service.update(area);
             res.sendStatus(200);
         } catch (error) {
             res.status(500);
@@ -41,32 +41,12 @@ class AreaController {
 
     getList = async (req, res) => {
         try {
-            const coordinates = await this.service.getCoordinates();
-            const areas = await this.service.getList();
-            const list = this.mapCoordinatesToArea(coordinates, areas);
+            const list = await this.service.getList();
             res.status(200).json(list);
         } catch (error) {
             res.status(500);
         }
     };
-
-    mapCoordinatesToArea(coordinates, areas) {
-        return areas.map((area) => {
-            return {
-                id: area.id,
-                zoneId: area.id_zone,
-                shape: area.zone_shape,
-                coordinates: coordinates
-                    .filter((coor) => coor.id_gis === area.id)
-                    .sort((a, b) => a.coordinates_order - b.coordinates_order)
-                    .map((el) => ({
-                        lat: el.coordinates_latitude,
-                        lng: el.coordinates_longitude,
-                        radius: el.coordinates_radius,
-                    })),
-            };
-        });
-    }
 }
 
 module.exports = { AreaController };

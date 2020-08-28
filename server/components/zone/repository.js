@@ -1,6 +1,6 @@
-const connection = require("../db");
+const connection = require("../../db");
 
-class ZoneService {
+class ZoneRepository {
     async getList() {
         return new Promise((res, rej) => {
             connection.query("SELECT * FROM cp_program_zones", (error, results) => {
@@ -11,4 +11,4 @@ class ZoneService {
     }
 }
 
-module.exports = { ZoneService };
+module.exports = { ZoneRepository };

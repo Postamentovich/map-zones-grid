@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { ZoneController } = require("../controllers/zone.controller");
+const { ZoneController } = require("../components/zone/controller");
 
 const router = Router();
 const controller = new ZoneController();

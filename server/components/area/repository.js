@@ -1,16 +1,23 @@
-const connection = require("../db");
+const connection = require("../../db");
 
-class AreaService {
+class AreaRepository {
+    zoneTable = "cp_program_zone_gis";
+    coordinatesTable = "cp_program_zone_gis_coordinates";
+
     getSqlForCoordinates = (area, insertId) => {
         if (area.shape === "Circle") {
-            return `INSERT INTO cp_program_zone_gis_coordinates (id_gis, coordinates_order, coordinates_radius, coordinates_latitude, coordinates_longitude) VALUES ${area.coordinates
+            return `INSERT INTO ${
+                this.coordinatesTable
+            } (id_gis, coordinates_order, coordinates_radius, coordinates_latitude, coordinates_longitude) VALUES ${area.coordinates
                 .map((coor, index) => {
                     return `(${insertId}, ${index}, '${coor.radius}', '${coor.lat}', '${coor.lng}')`;
                 })
                 .join(", ")}
             ;`;
         }
-        return `INSERT INTO cp_program_zone_gis_coordinates (id_gis, coordinates_order, coordinates_latitude, coordinates_longitude) VALUES ${area.coordinates
+        return `INSERT INTO ${
+            this.coordinatesTable
+        } (id_gis, coordinates_order, coordinates_latitude, coordinates_longitude) VALUES ${area.coordinates
             .map((coor, index) => {
                 return `(${insertId}, ${index}, '${coor.lat}', '${coor.lng}')`;
             })
@@ -19,7 +26,7 @@ class AreaService {
     };
 
     async create(area) {
-        const sqlZones = `INSERT INTO cp_program_zone_gis (id_zone, zone_shape, zone_type_status) VALUES ("${area.zoneId}", "${area.shape}", "Active")`;
+        const sqlZones = `INSERT INTO ${this.zoneTable} (id_zone, zone_shape, zone_type_status) VALUES ("${area.zoneId}", "${area.shape}", "Active")`;
         return new Promise((res, rej) => {
             connection.query(sqlZones, (error, results) => {
                 if (error) rej(error);
@@ -27,7 +34,7 @@ class AreaService {
                 let sqlCoordinates = this.getSqlForCoordinates(area, insertId);
                 connection.query(sqlCoordinates, (error, results) => {
                     if (error) rej(error);
-                    res(results);
+                    res(insertId);
                 });
             });
         });
@@ -36,7 +43,7 @@ class AreaService {
     async update(area) {
         const areaId = area.id;
         return new Promise((res, rej) => {
-            const sqlDeleteCoordinates = `DELETE FROM cp_program_zone_gis_coordinates WHERE id_gis = ${areaId}`;
+            const sqlDeleteCoordinates = `DELETE FROM ${this.coordinatesTable} WHERE id_gis = ${areaId}`;
             connection.query(sqlDeleteCoordinates, (error, results) => {
                 if (error) rej(error);
                 let sqlCoordinates = this.getSqlForCoordinates(area, areaId);
@@ -50,7 +57,7 @@ class AreaService {
 
     async delete(areaId) {
         return new Promise((res, rej) => {
-            const sqlDeleteCoordinates = `DELETE FROM cp_program_zone_gis_coordinates WHERE id_gis = ${areaId}`;
+            const sqlDeleteCoordinates = `DELETE FROM ${this.coordinatesTable} WHERE id_gis = ${areaId}`;
             connection.query(sqlDeleteCoordinates, (error, results) => {
                 if (error) rej(error);
                 const sqlDeleteArea = `DELETE FROM cp_program_zone_gis WHERE id = ${areaId}`;
@@ -64,7 +71,7 @@ class AreaService {
 
     async getCoordinates() {
         return new Promise((res, rej) => {
-            connection.query("SELECT * FROM cp_program_zone_gis_coordinates", (error, results) => {
+            connection.query(`SELECT * FROM ${this.coordinatesTable}`, (error, results) => {
                 if (error) rej(error);
                 res(results);
             });
@@ -73,7 +80,7 @@ class AreaService {
 
     async getList() {
         return new Promise((res, rej) => {
-            connection.query("SELECT * FROM cp_program_zone_gis", (error, results) => {
+            connection.query(`SELECT * FROM ${this.zoneTable}`, (error, results) => {
                 if (error) rej(error);
                 res(results);
             });
@@ -81,4 +88,4 @@ class AreaService {
     }
 }
 
-module.exports = { AreaService };
+module.exports = { AreaRepository };
