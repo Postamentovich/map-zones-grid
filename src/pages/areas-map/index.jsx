@@ -4,8 +4,8 @@ import "./index.scss";
 
 export const AreaMapPage = () => {
     return (
-        <div className="area-page">
-            <Map withGeoman />
+        <div className="page">
+            <Map withAreaControll />
         </div>
     );
 };
