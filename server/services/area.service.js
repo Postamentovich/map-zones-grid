@@ -1,16 +1,6 @@
-const mysql = require("mysql");
+const connection = require("../db");
 
 class AreaService {
-    constructor() {
-        this.connection = mysql.createConnection({
-            host: "localhost",
-            user: "root",
-            password: "root",
-            database: "tmp_program",
-        });
-        this.connection.connect();
-    }
-
     getSqlForCoordinates = (area, insertId) => {
         if (area.shape === "Circle") {
             return `INSERT INTO cp_program_zone_gis_coordinates (id_gis, coordinates_order, coordinates_radius, coordinates_latitude, coordinates_longitude) VALUES ${area.coordinates
@@ -31,11 +21,11 @@ class AreaService {
     async create(area) {
         const sqlZones = `INSERT INTO cp_program_zone_gis (id_zone, zone_shape, zone_type_status) VALUES ("${area.zoneId}", "${area.shape}", "Active")`;
         return new Promise((res, rej) => {
-            this.connection.query(sqlZones, (error, results) => {
+            connection.query(sqlZones, (error, results) => {
                 if (error) rej(error);
                 const { insertId } = results;
                 let sqlCoordinates = this.getSqlForCoordinates(area, insertId);
-                this.connection.query(sqlCoordinates, (error, results) => {
+                connection.query(sqlCoordinates, (error, results) => {
                     if (error) rej(error);
                     res(results);
                 });
@@ -47,10 +37,10 @@ class AreaService {
         const areaId = area.id;
         return new Promise((res, rej) => {
             const sqlDeleteCoordinates = `DELETE FROM cp_program_zone_gis_coordinates WHERE id_gis = ${areaId}`;
-            this.connection.query(sqlDeleteCoordinates, (error, results) => {
+            connection.query(sqlDeleteCoordinates, (error, results) => {
                 if (error) rej(error);
                 let sqlCoordinates = this.getSqlForCoordinates(area, areaId);
-                this.connection.query(sqlCoordinates, (error, results) => {
+                connection.query(sqlCoordinates, (error, results) => {
                     if (error) rej(error);
                     res(results);
                 });
@@ -61,10 +51,10 @@ class AreaService {
     async delete(areaId) {
         return new Promise((res, rej) => {
             const sqlDeleteCoordinates = `DELETE FROM cp_program_zone_gis_coordinates WHERE id_gis = ${areaId}`;
-            this.connection.query(sqlDeleteCoordinates, (error, results) => {
+            connection.query(sqlDeleteCoordinates, (error, results) => {
                 if (error) rej(error);
                 const sqlDeleteArea = `DELETE FROM cp_program_zone_gis WHERE id = ${areaId}`;
-                this.connection.query(sqlDeleteArea, (error, results) => {
+                connection.query(sqlDeleteArea, (error, results) => {
                     res(results);
                     if (error) rej(error);
                 });
@@ -74,7 +64,7 @@ class AreaService {
 
     async getCoordinates() {
         return new Promise((res, rej) => {
-            this.connection.query("SELECT * FROM cp_program_zone_gis_coordinates", (error, results) => {
+            connection.query("SELECT * FROM cp_program_zone_gis_coordinates", (error, results) => {
                 if (error) rej(error);
                 res(results);
             });
@@ -83,7 +73,7 @@ class AreaService {
 
     async getList() {
         return new Promise((res, rej) => {
-            this.connection.query("SELECT * FROM cp_program_zone_gis", (error, results) => {
+            connection.query("SELECT * FROM cp_program_zone_gis", (error, results) => {
                 if (error) rej(error);
                 res(results);
             });
