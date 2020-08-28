@@ -1,16 +1,16 @@
-// const { AreaService } = require("../services/area.service");
+const { GridService } = require("./service");
 
 class GridController {
     constructor() {
-        // this.service = new AreaService();
+        this.service = new GridService();
     }
 
     create = async (req, res) => {
         try {
-            const { area } = req.body;
-            if (!area) res.sendStatus(400);
-            this.service.create(area);
-            res.sendStatus(201);
+            const { grid } = req.body;
+            if (!grid) res.sendStatus(400);
+            const zoneId = await this.service.create(grid);
+            res.status(200).json(zoneId);
         } catch (error) {
             res.status(500);
         }
@@ -18,9 +18,9 @@ class GridController {
 
     update = async (req, res) => {
         try {
-            const { area } = req.body;
-            if (!area) res.sendStatus(400);
-            this.service.update(area);
+            const { grid } = req.body;
+            if (!grid) res.sendStatus(400);
+            await this.service.update(grid);
             res.sendStatus(200);
         } catch (error) {
             res.status(500);
@@ -29,21 +29,19 @@ class GridController {
 
     delete = async (req, res) => {
         const { id } = req.params;
-        const areaId = Number(id);
-        if (typeof areaId !== "number") res.sendStatus(400);
+        const gridId = Number(id);
+        if (typeof gridId !== "number") res.sendStatus(400);
         try {
-            await this.service.delete(areaId);
+            await this.service.delete(gridId);
             res.sendStatus(200);
         } catch (error) {
             res.status(500);
         }
     };
 
-    getCell = async (req, res) => {
+    getList = async (req, res) => {
         try {
-            const coordinates = await this.service.getCoordinates();
-            const areas = await this.service.getList();
-            const list = this.mapCoordinatesToArea(coordinates, areas);
+            const list = await this.service.getList();
             res.status(200).json(list);
         } catch (error) {
             res.status(500);

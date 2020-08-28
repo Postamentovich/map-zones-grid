@@ -60,7 +60,7 @@ class AreaRepository {
             const sqlDeleteCoordinates = `DELETE FROM ${this.coordinatesTable} WHERE id_gis = ${areaId}`;
             connection.query(sqlDeleteCoordinates, (error, results) => {
                 if (error) rej(error);
-                const sqlDeleteArea = `DELETE FROM cp_program_zone_gis WHERE id = ${areaId}`;
+                const sqlDeleteArea = `DELETE FROM ${this.zoneTable} WHERE id = ${areaId}`;
                 connection.query(sqlDeleteArea, (error, results) => {
                     res(results);
                     if (error) rej(error);
