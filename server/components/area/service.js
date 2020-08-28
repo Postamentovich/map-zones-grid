@@ -1,9 +1,32 @@
 const { AreaRepository } = require("./repository");
-
+const turf = require("@turf/turf");
 class AreaService {
     constructor() {
         this.repository = new AreaRepository();
     }
+
+    isPointInArea = (area, lat, lng) => {
+        const point = turf.point([lat, lng]);
+        if (area.shape === "Circle") {
+            const coor = area.coordinates[0];
+            if (!coor) return;
+            const center = turf.point([coor.lat, coor.lng]);
+            const radius = coor.radius;
+            const distance = turf.distance(point, center) * 1000;
+            return distance < radius;
+        } else if (area.shape === "Polygon") {
+            const coordinates = area.coordinates.map((el) => [el.lat, el.lng]);
+            if (coordinates.length && coordinates.length < 4) coordinates.push(coordinates[coordinates.length - 1]);
+            const line = turf.lineString(coordinates);
+            const polygon = turf.lineToPolygon(line);
+            return turf.booleanPointInPolygon(point, polygon);
+        }
+    };
+
+    search = async (lat, lng) => {
+        const list = await this.getList();
+        return list.filter((area) => this.isPointInArea(area, lat, lng));
+    };
 
     create = async (area) => {
         return await this.repository.create(area);

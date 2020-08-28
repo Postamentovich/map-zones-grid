@@ -5,6 +5,18 @@ class AreaController {
         this.service = new AreaService();
     }
 
+    search = async (req, res) => {
+        try {
+            const { lat, lng } = req.query;
+            if (!lat || !lng) res.sendStatus(400);
+            const result = await this.service.search(lat, lng);
+            res.status(200).json(result);
+        } catch (error) {
+            console.error(error);
+            res.status(500);
+        }
+    };
+
     create = async (req, res) => {
         try {
             const { area } = req.body;
@@ -12,6 +24,7 @@ class AreaController {
             const zone = await this.service.create(area);
             res.status(200).json(zone);
         } catch (error) {
+            console.error(error);
             res.status(500);
         }
     };
@@ -23,6 +36,7 @@ class AreaController {
             await this.service.update(area);
             res.sendStatus(200);
         } catch (error) {
+            console.error(error);
             res.status(500);
         }
     };
@@ -35,6 +49,7 @@ class AreaController {
             await this.service.delete(areaId);
             res.sendStatus(200);
         } catch (error) {
+            console.error(error);
             res.status(500);
         }
     };
@@ -44,6 +59,7 @@ class AreaController {
             const list = await this.service.getList();
             res.status(200).json(list);
         } catch (error) {
+            console.error(error);
             res.status(500);
         }
     };

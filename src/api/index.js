@@ -20,6 +20,14 @@ export async function deleteArea(id) {
     return data;
 }
 
+export async function searchArea(lat, lng) {
+    const params = new URLSearchParams();
+    if (lat) params.set("lat", lat);
+    if (lng) params.set("lng", lng);
+    const { data } = await axios.get(`/api/area/search`, { params });
+    return data;
+}
+
 let cachZones = null;
 export async function getZones() {
     if (cachZones) return cachZones;
