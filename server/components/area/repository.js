@@ -28,13 +28,13 @@ class AreaRepository {
     async create(area) {
         const sqlZones = `INSERT INTO ${this.zoneTable} (id_zone, zone_shape, zone_type_status) VALUES ("${area.zoneId}", "${area.shape}", "Active")`;
         return new Promise((res, rej) => {
-            connection.query(sqlZones, (error, results) => {
+            connection.query(sqlZones, (error, resultsArea, fieldsArea) => {
                 if (error) rej(error);
-                const { insertId } = results;
+                const { insertId } = resultsArea;
                 let sqlCoordinates = this.getSqlForCoordinates(area, insertId);
-                connection.query(sqlCoordinates, (error, results) => {
+                connection.query(sqlCoordinates, (error, resultsCoordinates, fieldsCoor) => {
                     if (error) rej(error);
-                    res(insertId);
+                    res({ ...area, id: insertId });
                 });
             });
         });

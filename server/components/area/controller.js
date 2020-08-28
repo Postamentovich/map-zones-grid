@@ -9,8 +9,8 @@ class AreaController {
         try {
             const { area } = req.body;
             if (!area) res.sendStatus(400);
-            const zoneId = await this.service.create(area);
-            res.status(200).json(zoneId);
+            const zone = await this.service.create(area);
+            res.status(200).json(zone);
         } catch (error) {
             res.status(500);
         }

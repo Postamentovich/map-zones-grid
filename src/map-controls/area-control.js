@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import L from "leaflet";
-import { MapAreaPopup } from "../../components/map-area-popup";
-import { getCenterZoneByGeometry } from "../../utils/map-utils";
-import { getAreas, createArea, updateArea, deleteArea } from "../../api";
+import { MapAreaPopup } from "../components/map-area-popup";
+import { getCenterZoneByGeometry } from "../utils/map-utils";
+import { getAreas, createArea, updateArea, deleteArea } from "../api";
 
 export class AreaMapControl extends L.Control {
     activeModel = null;
@@ -39,8 +39,11 @@ export class AreaMapControl extends L.Control {
             coordinates,
         };
         try {
-            await createArea(model);
+            const area = await createArea(model);
             this.popup.remove();
+            this.activeModel.layer
+                .on("pm:edit", (e) => this.onEditArea(area, e))
+                .on("pm:remove", (e) => this.onRemoveArea(area.id, e));
             this.activeModel = null;
         } catch (error) {
             console.error(error);
@@ -75,7 +78,6 @@ export class AreaMapControl extends L.Control {
     };
 
     onEditArea = async (area, e) => {
-        console.log(e);
         const newModel = {
             ...area,
             coordinates:
@@ -131,7 +133,6 @@ export class AreaMapControl extends L.Control {
         L.circle(center, { radius })
             .addTo(this.map)
             .on("pm:edit", (e) => this.onEditArea(area, e))
-            .on("pm:cut", (e) => this.onEditArea(area, e))
             .on("pm:remove", (e) => this.onRemoveArea(area.id, e));
     }
 
@@ -141,7 +142,6 @@ export class AreaMapControl extends L.Control {
         L.polygon(latLngs)
             .addTo(this.map)
             .on("pm:edit", (e) => this.onEditArea(area, e))
-            .on("pm:cut", (e) => this.onEditArea(area, e))
             .on("pm:remove", (e) => this.onRemoveArea(area.id, e));
     }
 }

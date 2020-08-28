@@ -6,7 +6,7 @@ class AreaService {
     }
 
     create = async (area) => {
-        return this.repository.create(area);
+        return await this.repository.create(area);
     };
 
     update = async (area) => {
@@ -24,22 +24,24 @@ class AreaService {
         return list;
     };
 
+    mapAreaCoordiantes(area, coordinates) {
+        return {
+            id: area.id,
+            zoneId: area.id_zone,
+            shape: area.zone_shape,
+            coordinates: coordinates
+                .filter((coor) => coor.id_gis === area.id)
+                .sort((a, b) => a.coordinates_order - b.coordinates_order)
+                .map((el) => ({
+                    lat: el.coordinates_latitude,
+                    lng: el.coordinates_longitude,
+                    radius: el.coordinates_radius,
+                })),
+        };
+    }
+
     mapCoordinatesToArea(coordinates, areas) {
-        return areas.map((area) => {
-            return {
-                id: area.id,
-                zoneId: area.id_zone,
-                shape: area.zone_shape,
-                coordinates: coordinates
-                    .filter((coor) => coor.id_gis === area.id)
-                    .sort((a, b) => a.coordinates_order - b.coordinates_order)
-                    .map((el) => ({
-                        lat: el.coordinates_latitude,
-                        lng: el.coordinates_longitude,
-                        radius: el.coordinates_radius,
-                    })),
-            };
-        });
+        return areas.map((area) => this.mapAreaCoordiantes(area, coordinates));
     }
 }
 
