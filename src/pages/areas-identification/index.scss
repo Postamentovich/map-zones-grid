@@ -1,4 +1,22 @@
-.area-identification-page{
+.identification-page {
     display: flex;
     flex-direction: column;
+
+    &__label {
+        margin: 5px 0;
+    }
+
+    &__input {
+        padding: 5px;
+    }
+
+    &__button {
+        margin-top: 15px;
+        padding: 5px;
+    }
+
+    &__zone-title {
+        margin: 10px 0;
+        font-weight: bold;
+    }
 }

@@ -43,6 +43,8 @@ export const Map = ({ withAreaControll = false, withGridControll = false }) => {
                 cutPolygon: false,
                 drawPolygon: false,
                 drawCircle: false,
+                editMode: false,
+                dragMode: false,
             });
             map.addControl(gridMapControl);
         }

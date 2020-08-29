@@ -3,10 +3,24 @@ import ReactDOM from "react-dom";
 import L from "leaflet";
 import { MapAreaPopup } from "../components/map-area-popup";
 import { getCenterZoneByGeometry } from "../utils/map-utils";
-import { getAreas, createArea, updateArea, deleteArea } from "../api";
+import { getAreas, createArea, updateArea, deleteArea, getZones } from "../api";
 
 export class AreaMapControl extends L.Control {
     activeModel = null;
+    zones = [];
+    constructor() {
+        super();
+        this.getZones();
+    }
+
+    getZones = async () => {
+        try {
+            const zones = await getZones();
+            this.zones = zones;
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     onAdd(map) {
         this.map = map;
@@ -41,9 +55,12 @@ export class AreaMapControl extends L.Control {
         try {
             const area = await createArea(model);
             this.popup.remove();
+            if (!this.zones.length) await this.getZones();
+            const popupTitle = this.zones.find((el) => el.id === area.zoneId).title;
             this.activeModel.layer
                 .on("pm:edit", (e) => this.onEditArea(area, e))
-                .on("pm:remove", (e) => this.onRemoveArea(area.id, e));
+                .on("pm:remove", (e) => this.onRemoveArea(area.id, e))
+                .bindPopup(popupTitle);
             this.activeModel = null;
         } catch (error) {
             console.error(error);
@@ -125,23 +142,29 @@ export class AreaMapControl extends L.Control {
         });
     }
 
-    drawCircle(area) {
+    async drawCircle(area) {
         const coor = area.coordinates[0];
         if (!coor) return;
         const center = [coor.lat, coor.lng];
         const radius = coor.radius;
+        if (!this.zones.length) await this.getZones();
+        const popupTitle = this.zones.find((el) => el.id === area.zoneId).title;
         L.circle(center, { radius })
             .addTo(this.map)
             .on("pm:edit", (e) => this.onEditArea(area, e))
-            .on("pm:remove", (e) => this.onRemoveArea(area.id, e));
+            .on("pm:remove", (e) => this.onRemoveArea(area.id, e))
+            .bindPopup(popupTitle);
     }
 
-    drawPolygon(area) {
+    async drawPolygon(area) {
         const latLngs = area.coordinates.map((el) => [el.lat, el.lng]);
         if (!latLngs.length) return;
+        if (!this.zones.length) await this.getZones();
+        const popupTitle = this.zones.find((el) => el.id === area.zoneId).title;
         L.polygon(latLngs)
             .addTo(this.map)
             .on("pm:edit", (e) => this.onEditArea(area, e))
-            .on("pm:remove", (e) => this.onRemoveArea(area.id, e));
+            .on("pm:remove", (e) => this.onRemoveArea(area.id, e))
+            .bindPopup(popupTitle);
     }
 }

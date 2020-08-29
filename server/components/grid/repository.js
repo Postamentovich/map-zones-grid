@@ -11,8 +11,7 @@ class GridRepository {
             .map((coor, index) => {
                 return `(${insertId}, ${index}, '${coor.lat}', '${coor.lng}')`;
             })
-            .join(", ")}
-                ;`;
+            .join(", ")};`;
     };
 
     create = async (grid) => {
@@ -25,7 +24,7 @@ class GridRepository {
                 let sqlCoordinates = this.getSqlForCoordinates(grid, insertId);
                 connection.query(sqlCoordinates, (error, results) => {
                     if (error) rej(error);
-                    res(insertId);
+                    res({ ...grid, id: insertId });
                 });
             });
         });

@@ -1,0 +1,29 @@
+.map-grid-popup {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    &__label {
+        font-size: 14px;
+        font-weight: bold;    
+    }
+
+    &__select {
+        margin-top: 10px;
+        padding: 5px;
+    }
+
+    &__controls {
+        margin-top: 10px;
+        display: flex;
+    }
+
+    &__button {
+        width: 100%;
+        padding: 5px;
+        cursor: pointer;
+        &:not(:first-child){
+            margin-left: 10px;
+        }
+    }
+}

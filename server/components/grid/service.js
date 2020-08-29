@@ -33,7 +33,7 @@ class GridService {
                 columns: grid.grid_map_columns,
                 status: grid.grid_map_status,
                 coordinates: coordinates
-                    .filter((coor) => coor.id_gis === grid.id)
+                    .filter((coor) => coor.id_grid_map === grid.id)
                     .sort((a, b) => a.coordinates_order - b.coordinates_order)
                     .map((el) => ({
                         lat: el.coordinates_latitude,
