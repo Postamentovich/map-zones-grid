@@ -6,16 +6,16 @@ class AreaService {
     }
 
     isPointInArea = (area, lat, lng) => {
-        const point = turf.point([lat, lng]);
+        const point = turf.point([lng, lat]);
         if (area.shape === "Circle") {
             const coor = area.coordinates[0];
             if (!coor) return;
-            const center = turf.point([coor.lat, coor.lng]);
+            const center = turf.point([coor.lng, coor.lat]);
             const radius = coor.radius;
             const distance = turf.distance(point, center) * 1000;
             return distance < radius;
         } else if (area.shape === "Polygon") {
-            const coordinates = area.coordinates.map((el) => [el.lat, el.lng]);
+            const coordinates = area.coordinates.map((el) => [el.lng, el.lat]);
             if (coordinates.length && coordinates.length < 4) coordinates.push(coordinates[coordinates.length - 1]);
             const line = turf.lineString(coordinates);
             const polygon = turf.lineToPolygon(line);
@@ -43,8 +43,7 @@ class AreaService {
     getList = async () => {
         const coordinates = await this.repository.getCoordinates();
         const areas = await this.repository.getList();
-        const list = this.mapCoordinatesToArea(coordinates, areas);
-        return list;
+        return this.mapCoordinatesToArea(coordinates, areas);
     };
 
     mapAreaCoordiantes(area, coordinates) {

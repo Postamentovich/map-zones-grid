@@ -112,7 +112,6 @@ export class GridMapControl extends L.Control {
 
     init() {
         this.map.on("pm:create", this.onCreateGrid);
-        L.circle({ lat: 47.39463076190644, lng: 14.348144531250002 }).addTo(this.map);
         this.drawGrids();
     }
 

@@ -67,13 +67,13 @@
 |   ├── App.js                      # Main component
 |   ├── index.js                    # Enter component
 |   └── index.scss                  # Styles css
-|
 └── server/                         # Server
     ├── components/                 # App components
     |   ├── area/
     |   ├── zone/
     |   └── grid/
     ├── config/                     # App config
+    ├── middlewares/                # App middlewares
     ├── routes/                     # App routes
     └── db.js                       # Database connection
 ```

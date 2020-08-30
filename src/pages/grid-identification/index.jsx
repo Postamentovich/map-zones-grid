@@ -11,10 +11,12 @@ export const GridIdentificationPage = () => {
 
     const onClick = async () => {
         try {
+            setCell(null);
             const cell = await searchGridCell(lat, lng);
             setCell(cell);
             setIsSearch(true);
         } catch (error) {
+            setIsSearch(true);
             setCell(null);
         }
     };

@@ -1,8 +1,8 @@
 import React from "react";
-import "./index.scss";
 import { useState } from "react";
 import { searchArea, getZones } from "../../api";
 import { useEffect } from "react";
+import "./index.scss";
 
 const baseClass = "identification-page";
 export const AreaIdentificationPage = () => {
@@ -26,6 +26,7 @@ export const AreaIdentificationPage = () => {
 
     const onClick = async () => {
         try {
+            setAreas([]);
             const areas = await searchArea(lat, lng);
             const includedAreas = [];
             const processAreas = areas.reduce((acc, val) => {
@@ -35,11 +36,11 @@ export const AreaIdentificationPage = () => {
                 }
                 return acc;
             }, []);
-            console.log(processAreas);
             setIsSearch(true);
             setAreas(processAreas);
         } catch (error) {
             setAreas([]);
+            setIsSearch(true);
         }
     };
 
@@ -71,19 +72,21 @@ export const AreaIdentificationPage = () => {
             </button>
             {isSearch &&
                 (areas.length ? (
-                    <div className={`${baseClass}__zone-title`}>Found zones:</div>
+                    <>
+                        <div className={`${baseClass}__zone-title`}>Found zones:</div>
+                        {areas.map((area) => {
+                            const zone = zones.find((el) => area.zoneId === el.id);
+                            if (!zone) return null;
+                            return (
+                                <div className={`${baseClass}__zone`} key={area.zoneId}>
+                                    {zone.title}
+                                </div>
+                            );
+                        })}
+                    </>
                 ) : (
                     <div className={`${baseClass}__zone-title`}>Zones not found</div>
                 ))}
-            {areas.map((area) => {
-                const zone = zones.find((el) => area.zoneId === el.id);
-                if (!zone) return null;
-                return (
-                    <div className={`${baseClass}__zone`} key={area.zoneId}>
-                        {zone.title}
-                    </div>
-                );
-            })}
         </div>
     );
 };

@@ -23,6 +23,7 @@ export const MapGridPopup = ({ onCancel, onSave }) => {
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                autoFocus
             />
             <label className={`${baseClass}__label`} htmlFor="columns">
                 Columns

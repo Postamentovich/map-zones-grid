@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import L from "leaflet";
 import { MapAreaPopup } from "../components/map-area-popup";
-import { getCenterZoneByGeometry } from "../utils/map-utils";
 import { getAreas, createArea, updateArea, deleteArea, getZones } from "../api";
 
 export class AreaMapControl extends L.Control {
@@ -81,9 +80,8 @@ export class AreaMapControl extends L.Control {
         if (!permissionShapes.includes(e.shape)) return;
         this.activeModel = { geometry: null, radius: null, layer: null, center: null, shape: null };
         if (e.shape === "Rectangle" || e.shape === "Polygon") {
-            const geometry = e.layer._latlngs[0];
-            this.activeModel.center = getCenterZoneByGeometry(geometry);
-            this.activeModel.geometry = geometry;
+            this.activeModel.center = e.layer.getCenter();
+            this.activeModel.geometry = e.layer.getLatLngs()[0];
         } else if (e.shape === "Circle") {
             const center = e.layer._latlng;
             this.activeModel.center = center;
@@ -98,7 +96,7 @@ export class AreaMapControl extends L.Control {
         const newModel = {
             ...area,
             coordinates:
-                area.shape === "Circle" ? [{ ...e.layer._latlng, radius: e.layer._mRadius }] : e.layer._latlngs[0],
+                area.shape === "Circle" ? [{ ...e.layer._latlng, radius: e.layer._mRadius }] : e.layer.getLatLngs()[0],
         };
         try {
             await updateArea(newModel);
@@ -145,11 +143,10 @@ export class AreaMapControl extends L.Control {
     async drawCircle(area) {
         const coor = area.coordinates[0];
         if (!coor) return;
-        const center = [coor.lat, coor.lng];
         const radius = coor.radius;
         if (!this.zones.length) await this.getZones();
         const popupTitle = this.zones.find((el) => el.id === area.zoneId).title;
-        L.circle(center, { radius })
+        L.circle(coor, { radius })
             .addTo(this.map)
             .on("pm:edit", (e) => this.onEditArea(area, e))
             .on("pm:remove", (e) => this.onRemoveArea(area.id, e))
@@ -157,11 +154,9 @@ export class AreaMapControl extends L.Control {
     }
 
     async drawPolygon(area) {
-        const latLngs = area.coordinates.map((el) => [el.lat, el.lng]);
-        if (!latLngs.length) return;
         if (!this.zones.length) await this.getZones();
         const popupTitle = this.zones.find((el) => el.id === area.zoneId).title;
-        L.polygon(latLngs)
+        L.polygon(area.coordinates)
             .addTo(this.map)
             .on("pm:edit", (e) => this.onEditArea(area, e))
             .on("pm:remove", (e) => this.onRemoveArea(area.id, e))
