@@ -11,7 +11,7 @@ const mapId = "leaflet-map-id";
 
 export const Map = ({ withAreaControll = false, withGridControll = false }) => {
     useEffect(() => {
-        const map = L.map(mapId).setView([47.57652571374621, 14.3316650390625], 8);
+        const map = L.map(mapId).setView([-33.90461600836232, 151.17805480957028], 12);
         const accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
         const areaMapControl = new AreaMapControl();
         const gridMapControl = new GridMapControl();

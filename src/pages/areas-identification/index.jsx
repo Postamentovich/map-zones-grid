@@ -6,8 +6,8 @@ import { useEffect } from "react";
 
 const baseClass = "identification-page";
 export const AreaIdentificationPage = () => {
-    const [lat, setLat] = useState(47.720849190702324);
-    const [lng, setLng] = useState(13.2440185546875);
+    const [lat, setLat] = useState(0);
+    const [lng, setLng] = useState(0);
     const [zones, setZones] = useState([]);
     const [areas, setAreas] = useState([]);
     const [isSearch, setIsSearch] = useState(false);

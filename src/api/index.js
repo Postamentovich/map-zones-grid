@@ -38,6 +38,14 @@ export async function searchArea(lat, lng) {
     return data;
 }
 
+export async function searchGridCell(lat, lng) {
+    const params = new URLSearchParams();
+    if (lat) params.set("lat", lat);
+    if (lng) params.set("lng", lng);
+    const { data } = await axios.get(`/api/grid/search`, { params });
+    return data;
+}
+
 export async function createGrid(grid) {
     const { data } = await axios.post("/api/grid", { grid });
     return data;

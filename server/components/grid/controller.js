@@ -5,6 +5,18 @@ class GridController {
         this.service = new GridService();
     }
 
+    search = async (req, res) => {
+        try {
+            const { lat, lng } = req.query;
+            if (!lat || !lng) res.sendStatus(400);
+            const result = await this.service.search(lat, lng);
+            res.status(200).json(result);
+        } catch (error) {
+            console.error(error);
+            res.status(500);
+        }
+    };
+
     create = async (req, res) => {
         try {
             const { grid } = req.body;

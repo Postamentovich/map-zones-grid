@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import L from "leaflet";
 import * as turf from "@turf/turf";
-import { getCenterZoneByGeometry } from "../utils/map-utils";
 import { MapGridPopup } from "../components/map-grid-popup";
 import { createGrid, getGrids, deleteGrid } from "../api";
 
@@ -36,6 +35,7 @@ export class GridMapControl extends L.Control {
             .openOn(this.map);
         ReactDOM.render(<MapGridPopup onCancel={this.onCancelGrid} onSave={this.onSaveGrid} />, popupContainer);
     };
+
     async delay() {
         return new Promise((resolve) => {
             setTimeout(() => {
@@ -43,36 +43,37 @@ export class GridMapControl extends L.Control {
             }, 300);
         });
     }
+
     drawGridColumnsRows = async ({ coordinates, columns, rows, id }) => {
         const latLngs = coordinates.map((el) => [el.lat, el.lng]);
+        const columnCoor = [latLngs[2], latLngs[1]];
+        const columnLine = turf.lineString(columnCoor);
+        const columnLength = turf.length(columnLine);
+        const columnStep = columnLength / columns;
+        const rowCoor = [latLngs[1], latLngs[0]];
+        const rowLine = turf.lineString(rowCoor);
+        const rowLength = turf.length(rowLine);
+        const rowStep = rowLength / rows;
 
-        const heightCoor = [latLngs[1], latLngs[0]];
-        const widthCoor = [latLngs[1], latLngs[2]];
-
-        const widthLine = turf.lineString(widthCoor);
-        const widthLength = turf.length(widthLine);
-        const widthStep = widthLength / columns;
-        const heightLine = turf.lineString(heightCoor);
-        const heightLength = turf.length(heightLine);
-        const heightStep = heightLength / rows;
         const layers = [];
-        this.grids.set(id, layers);
 
-        for (let i = 0; i < columns; i++) {
-            const offset = i * widthStep;
-            const heightOffset = turf.lineOffset(heightLine, offset);
-            const coordsOffset = turf.getCoords(heightOffset);
-            const layer = L.polyline(coordsOffset).addTo(this.map);
-            layers.push(layer);
-        }
-
-        for (let j = 0; j < rows; j++) {
-            const offset = j * heightStep;
-            const line = turf.lineOffset(widthLine, -offset);
+        for (let i = 1; i < columns; i++) {
+            const columnOffset = i * columnStep;
+            const line = turf.lineOffset(rowLine, columnOffset);
             const coords = turf.getCoords(line);
             const layer = L.polyline(coords).addTo(this.map);
             layers.push(layer);
         }
+
+        for (let i = 1; i < columns; i++) {
+            const columnOffset = i * rowStep;
+            const line = turf.lineOffset(columnLine, columnOffset);
+            const coords = turf.getCoords(line);
+            const layer = L.polyline(coords).addTo(this.map);
+            layers.push(layer);
+        }
+
+        this.grids.set(id, layers);
     };
 
     onSaveGrid = async ({ columns, rows, title }) => {
@@ -87,7 +88,9 @@ export class GridMapControl extends L.Control {
         try {
             const grid = await createGrid(model);
             this.drawGridColumnsRows(grid);
-            this.activeModel.layer.on("pm:remove", (e) => this.onRemoveArea(grid.id, e));
+            this.activeModel.layer
+                .on("pm:remove", (e) => this.onRemoveArea(grid.id, e))
+                .on("click", (e) => this.onClick(grid, e));
             this.activeModel.layer.bringToFront();
             this.popup.remove();
             this.activeModel = null;
@@ -97,18 +100,19 @@ export class GridMapControl extends L.Control {
     };
 
     onCreateGrid = (e) => {
+        const { layer, shape } = e;
         const permissionShapes = ["Rectangle"];
-        if (!permissionShapes.includes(e.shape)) return;
+        if (!permissionShapes.includes(shape)) return;
         this.activeModel = { geometry: null, layer: null, columns: 10, rows: 10 };
-        const geometry = e.layer._latlngs[0];
-        this.activeModel.center = getCenterZoneByGeometry(geometry);
-        this.activeModel.geometry = geometry;
-        this.activeModel.layer = e.layer;
+        this.activeModel.center = layer.getCenter();
+        this.activeModel.geometry = layer.getLatLngs()[0];
+        this.activeModel.layer = layer;
         this.showPopup(this.activeModel.center);
     };
 
     init() {
         this.map.on("pm:create", this.onCreateGrid);
+        L.circle({ lat: 47.39463076190644, lng: 14.348144531250002 }).addTo(this.map);
         this.drawGrids();
     }
 
@@ -132,19 +136,19 @@ export class GridMapControl extends L.Control {
     onRemoveArea = async (id) => {
         try {
             const layers = this.grids.get(id);
-            if (layers) {
-                layers.forEach((layer) => layer.remove());
-            }
+            if (layers) layers.forEach((layer) => layer.remove());
             await deleteGrid(id);
         } catch (error) {
             console.error(error);
         }
     };
 
+    onClick = (grid, e) => {};
+
     async drawPolygon(grid) {
-        const latLngs = grid.coordinates.map((el) => [el.lat, el.lng]);
-        if (!latLngs.length) return;
-        L.polygon(latLngs)
+        const { coordinates } = grid;
+        if (!coordinates.length) return;
+        L.polygon(coordinates)
             .addTo(this.map)
             .on("pm:remove", (e) => this.onRemoveArea(grid.id, e));
         this.drawGridColumnsRows(grid);

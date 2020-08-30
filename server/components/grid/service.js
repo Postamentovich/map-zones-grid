@@ -1,9 +1,59 @@
+const turf = require("@turf/turf");
 const { GridRepository } = require("./repository");
 
 class GridService {
     constructor() {
         this.repository = new GridRepository();
     }
+
+    numToAlpha = (num) => {
+        let alpha = "";
+        for (; num >= 0; num = parseInt(num / 26, 10) - 1) {
+            alpha = String.fromCharCode((num % 26) + 0x41) + alpha;
+        }
+        return alpha;
+    };
+
+    getCellInGrid = (grid, lat, lng) => {
+        const { coordinates, rows, columns } = grid;
+        const point = turf.point([lng, lat]);
+        const latLngs = coordinates.map((el) => [el.lng, el.lat]);
+        const columnCoor = [latLngs[1], latLngs[2]];
+        const columnLine = turf.lineString(columnCoor);
+        const columnLength = turf.length(columnLine);
+        const columnStep = columnLength / columns;
+        const rowCoor = [latLngs[1], latLngs[0]];
+        const rowLine = turf.lineString(rowCoor);
+        const rowLength = turf.length(rowLine);
+        const rowStep = rowLength / rows;
+        const columnPoint = turf.nearestPointOnLine(columnLine, point);
+        const rowPoint = turf.nearestPointOnLine(rowLine, point);
+        if (!columnPoint || !rowPoint) return;
+        const columnLocation = columnPoint.properties.location;
+        const rowLocation = rowPoint.properties.location;
+        const columnCell = Math.floor(columnLocation / columnStep);
+        const rowCell = Math.floor(rowLocation / rowStep);
+        const row = rowCell + 1;
+        const column = this.numToAlpha(columnCell);
+        return { row, column };
+    };
+
+    isPointInGrid = (grid, lat, lng) => {
+        const coordinates = grid.coordinates.map((el) => [el.lat, el.lng]);
+        if (coordinates.length < 2) return;
+        const point = turf.point([lat, lng]);
+        const line = turf.lineString(coordinates);
+        const polygon = turf.lineToPolygon(line);
+        return turf.booleanPointInPolygon(point, polygon);
+    };
+
+    search = async (lat, lng) => {
+        const list = await this.getList();
+        const grid = list.find((area) => this.isPointInGrid(area, lat, lng));
+        if (!grid) return;
+        const cell = this.getCellInGrid(grid, lat, lng);
+        return cell || null;
+    };
 
     create = async (area) => {
         return this.repository.create(area);
@@ -38,7 +88,6 @@ class GridService {
                     .map((el) => ({
                         lat: el.coordinates_latitude,
                         lng: el.coordinates_longitude,
-                        radius: el.coordinates_radius,
                     })),
             };
         });
