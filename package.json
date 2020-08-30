@@ -24,7 +24,7 @@
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=development concurrently \"npm run server\" \"npm run client\"",
-    "production": "cross-env NODE_ENV=production node app.js",
+    "production": "npm run build && cross-env NODE_ENV=production node app.js",
     "client": "react-scripts start",
     "server": "nodemon app.js",
     "build": "react-scripts build"

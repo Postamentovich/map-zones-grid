@@ -27,7 +27,7 @@ export const App = () => {
                                 className={`${baseClass}__nav-item`}
                                 activeClassName={`${baseClass}__nav-item_active`}
                             >
-                                Areas Map
+                                Area Map
                             </Link>
                         </li>
                         <li>
@@ -41,20 +41,20 @@ export const App = () => {
                         </li>
                         <li>
                             <Link
-                                to={routes.gridIdentification}
-                                className={`${baseClass}__nav-item`}
-                                activeClassName={`${baseClass}__nav-item_active`}
-                            >
-                                Grid Identification
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
                                 to={routes.gridMap}
                                 className={`${baseClass}__nav-item`}
                                 activeClassName={`${baseClass}__nav-item_active`}
                             >
                                 Grid Map
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to={routes.gridIdentification}
+                                className={`${baseClass}__nav-item`}
+                                activeClassName={`${baseClass}__nav-item_active`}
+                            >
+                                Grid Identification
                             </Link>
                         </li>
                     </ul>
