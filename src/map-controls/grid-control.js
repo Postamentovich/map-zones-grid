@@ -45,31 +45,40 @@ export class GridMapControl extends L.Control {
     }
 
     drawGridColumnsRows = async ({ coordinates, columns, rows, id }) => {
-        const latLngs = coordinates.map((el) => [el.lat, el.lng]);
-        const columnCoor = [latLngs[2], latLngs[1]];
-        const columnLine = turf.lineString(columnCoor);
-        const columnLength = turf.length(columnLine);
-        const columnStep = columnLength / columns;
-        const rowCoor = [latLngs[1], latLngs[0]];
-        const rowLine = turf.lineString(rowCoor);
-        const rowLength = turf.length(rowLine);
+        const latLngs = coordinates.map((el) => [el.lng, el.lat]);
+        const left = [latLngs[0], latLngs[1]];
+        const top = [latLngs[1], latLngs[2]];
+        const right = [latLngs[3], latLngs[2]];
+        const bottom = [latLngs[0], latLngs[3]];
+        const leftLine = turf.lineString(left);
+        const rightLine = turf.lineString(right);
+        const topLine = turf.lineString(top);
+        const bottomLine = turf.lineString(bottom);
+        const rowLength = turf.length(leftLine);
         const rowStep = rowLength / rows;
-
+        const columnLength = turf.length(topLine);
+        const columnStep = columnLength / columns;
         const layers = [];
 
-        for (let i = 1; i < columns; i++) {
-            const columnOffset = i * columnStep;
-            const line = turf.lineOffset(rowLine, columnOffset);
-            const coords = turf.getCoords(line);
-            const layer = L.polyline(coords).addTo(this.map);
+        for (let i = 1; i < rows; i++) {
+            const offset = rowStep * i;
+            const a = turf.along(leftLine, offset);
+            const b = turf.along(rightLine, offset);
+            const aCoor = turf.getCoord(a);
+            const bCoor = turf.getCoord(b);
+            const newLine = turf.lineString([aCoor, bCoor]);
+            const layer = L.geoJSON(newLine).addTo(this.map);
             layers.push(layer);
         }
 
         for (let i = 1; i < columns; i++) {
-            const columnOffset = i * rowStep;
-            const line = turf.lineOffset(columnLine, columnOffset);
-            const coords = turf.getCoords(line);
-            const layer = L.polyline(coords).addTo(this.map);
+            const offset = columnStep * i;
+            const a = turf.along(topLine, offset);
+            const b = turf.along(bottomLine, offset);
+            const aCoor = turf.getCoord(a);
+            const bCoor = turf.getCoord(b);
+            const newLine = turf.lineString([aCoor, bCoor]);
+            const layer = L.geoJSON(newLine).addTo(this.map);
             layers.push(layer);
         }
 

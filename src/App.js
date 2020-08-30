@@ -31,7 +31,7 @@ export const App = () => {
                     <ul className={`${baseClass}__nav-list`}>
                         {routes.map(({ url, title }) => {
                             return (
-                                <li>
+                                <li key={url}>
                                     <Link
                                         to={url}
                                         className={`${baseClass}__nav-item`}
@@ -47,9 +47,13 @@ export const App = () => {
                 <div className={`${baseClass}__page`}>
                     <Switch>
                         {routes.map(({ url, component }) => {
-                            return <Route path={url}>{component}</Route>;
+                            return (
+                                <Route key={url} path={url}>
+                                    {component}
+                                </Route>
+                            );
                         })}
-                        <Redirect to={routes.areaMap} />
+                        <Redirect to="/area-map" />
                     </Switch>
                 </div>
             </div>
