@@ -1,18 +1,14 @@
 const { ZoneService } = require("./service");
-
+const asyncHandler = require("express-async-handler");
 class ZoneController {
     constructor() {
         this.service = new ZoneService();
     }
 
-    getList = async (req, res) => {
-        try {
-            const zones = await this.service.getList();
-            res.json(zones);
-        } catch (error) {
-            res.status(500);
-        }
-    };
+    getList = asyncHandler(async (req, res) => {
+        const zones = await this.service.getList();
+        res.json(zones);
+    });
 }
 
 module.exports = { ZoneController };

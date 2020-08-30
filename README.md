@@ -78,7 +78,7 @@
     └── db.js                       # Database connection
 ```
 
-### <a name="start">Integration in project</a>
+### <a name="start">Start project</a>
 
 1. Rename the file .env.example to .env and enter all the necessary variables in it, the list below
 2. Install all dependencies `npm i`

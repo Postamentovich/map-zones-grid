@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const { getConfig } = require("./server/config");
+const errorHandler = require("./server/middlewares/error-handler");
 
 const { SERVER_PORT } = getConfig();
 const app = express();
@@ -16,5 +17,7 @@ if (process.env.NODE_ENV === "production") {
         res.send(path.resolve(__dirname, "build", "index.html"));
     });
 }
+
+// app.use(errorHandler);
 
 app.listen(SERVER_PORT, () => console.log(`App has been started on port ${SERVER_PORT}`));
