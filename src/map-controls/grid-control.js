@@ -1,3 +1,4 @@
+/* eslint-disable array-callback-return */
 import React from "react";
 import ReactDOM from "react-dom";
 import L from "leaflet";
