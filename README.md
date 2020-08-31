@@ -139,6 +139,13 @@ Npm scripts: <br> `npm run dev` - Run project in development mode <br> `npm run 
       <td>true</td>
       <td></td>
       <td>Database name</td>
-    </tr>  
+    </tr>
+    <tr>
+      <td>DB_PORT</td>
+      <td>Number</td>
+      <td>false</td>
+      <td>3306</td>
+      <td>Database port</td>
+    </tr>    
   </tbody>
 </table>
