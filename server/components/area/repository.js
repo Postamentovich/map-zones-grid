@@ -57,14 +57,10 @@ class AreaRepository {
 
     async delete(areaId) {
         return new Promise((res, rej) => {
-            const sqlDeleteCoordinates = `DELETE FROM ${this.coordinatesTable} WHERE id_gis = ${areaId}`;
-            connection.query(sqlDeleteCoordinates, (error, results) => {
+            const sql = `UPDATE ${this.zoneTable} SET zone_type_status = "Inactive"  WHERE id = ${areaId}`;
+            connection.query(sql, (error, results) => {
                 if (error) rej(error);
-                const sqlDeleteArea = `DELETE FROM ${this.zoneTable} WHERE id = ${areaId}`;
-                connection.query(sqlDeleteArea, (error, results) => {
-                    res(results);
-                    if (error) rej(error);
-                });
+                res(results);
             });
         });
     }
@@ -80,7 +76,7 @@ class AreaRepository {
 
     async getList() {
         return new Promise((res, rej) => {
-            connection.query(`SELECT * FROM ${this.zoneTable}`, (error, results) => {
+            connection.query(`SELECT * FROM ${this.zoneTable} WHERE zone_type_status = "Active"`, (error, results) => {
                 if (error) rej(error);
                 res(results);
             });

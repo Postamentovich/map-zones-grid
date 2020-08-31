@@ -63,14 +63,10 @@ class GridRepository {
 
     async delete(gridId) {
         return new Promise((res, rej) => {
-            const sqlDeleteCoordinates = `DELETE FROM ${this.coordinatesTable} WHERE id_grid_map = ${gridId}`;
-            connection.query(sqlDeleteCoordinates, (error, results) => {
+            const sql = `UPDATE ${this.gridTable} SET grid_map_status = "Inactive"  WHERE id = ${gridId}`;
+            connection.query(sql, (error, results) => {
                 if (error) rej(error);
-                const sqlDeleteArea = `DELETE FROM ${this.gridTable} WHERE id = ${gridId}`;
-                connection.query(sqlDeleteArea, (error, results) => {
-                    res(results);
-                    if (error) rej(error);
-                });
+                res(results);
             });
         });
     }
@@ -86,7 +82,7 @@ class GridRepository {
 
     async getList() {
         return new Promise((res, rej) => {
-            connection.query(`SELECT * FROM ${this.gridTable}`, (error, results) => {
+            connection.query(`SELECT * FROM ${this.gridTable} WHERE grid_map_status = "Active"`, (error, results) => {
                 if (error) rej(error);
                 res(results);
             });
