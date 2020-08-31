@@ -7,6 +7,7 @@ import { createGrid, getGrids, deleteGrid } from "../api";
 
 export class GridMapControl extends L.Control {
     grids = new Map();
+    isGridShowing = false;
 
     onAdd(map) {
         this.map = map;
@@ -36,19 +37,19 @@ export class GridMapControl extends L.Control {
         ReactDOM.render(<MapGridPopup onCancel={this.onCancelGrid} onSave={this.onSaveGrid} />, popupContainer);
     };
 
-    async delay() {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve();
-            }, 300);
-        });
-    }
+    numToAlpha = (num) => {
+        let alpha = "";
+        for (; num >= 0; num = parseInt(num / 26, 10) - 1) {
+            alpha = String.fromCharCode((num % 26) + 0x41) + alpha;
+        }
+        return alpha;
+    };
 
     drawGridColumnsRows = async ({ coordinates, columns, rows, id }) => {
         const latLngs = coordinates.map((el) => [el.lng, el.lat]);
-        const left = [latLngs[0], latLngs[1]];
+        const left = [latLngs[1], latLngs[0]];
         const top = [latLngs[1], latLngs[2]];
-        const right = [latLngs[3], latLngs[2]];
+        const right = [latLngs[2], latLngs[3]];
         const bottom = [latLngs[0], latLngs[3]];
         const leftLine = turf.lineString(left);
         const rightLine = turf.lineString(right);
@@ -59,6 +60,7 @@ export class GridMapControl extends L.Control {
         const columnLength = turf.length(topLine);
         const columnStep = columnLength / columns;
         const layers = [];
+        const markers = [];
 
         for (let i = 1; i < rows; i++) {
             const offset = rowStep * i;
@@ -82,7 +84,43 @@ export class GridMapControl extends L.Control {
             layers.push(layer);
         }
 
-        this.grids.set(id, layers);
+        for (let i = 1; i <= rows; i++) {
+            const offset = rowStep * i - rowStep / 2;
+            const a = turf.along(leftLine, offset);
+            const b = turf.along(rightLine, offset);
+            const aCoor = turf.getCoord(a);
+            const bCoor = turf.getCoord(b);
+            const sideLine = turf.lineString([aCoor, bCoor]);
+
+            for (let j = 1; j <= columns; j++) {
+                const offset = columnStep * j - columnStep / 2;
+                const a = turf.along(topLine, offset);
+                const b = turf.along(bottomLine, offset);
+                const aCoor = turf.getCoord(a);
+                const bCoor = turf.getCoord(b);
+
+                const secondLine = turf.lineString([aCoor, bCoor]);
+
+                const intersects = turf.lineIntersect(secondLine, sideLine);
+                const feature = intersects.features[0];
+
+                if (!feature) continue;
+                const columnName = this.numToAlpha(j - 1);
+                const coor = turf.getCoord(feature);
+                const opacity = this.map.getZoom() >= 15 ? 1 : 0;
+                const layer = new L.Marker(coor.reverse(), {
+                    icon: new L.DivIcon({
+                        className: "icon-grid-cell",
+                        html: `<span>${columnName}${i}</span>`,
+                    }),
+                    opacity,
+                }).addTo(this.map);
+
+                markers.push(layer);
+            }
+        }
+
+        this.grids.set(id, { layers, markers });
     };
 
     onSaveGrid = async ({ columns, rows, title }) => {
@@ -97,9 +135,7 @@ export class GridMapControl extends L.Control {
         try {
             const grid = await createGrid(model);
             this.drawGridColumnsRows(grid);
-            this.activeModel.layer
-                .on("pm:remove", (e) => this.onRemoveArea(grid.id, e))
-                .on("click", (e) => this.onClick(grid, e));
+            this.activeModel.layer.on("pm:remove", (e) => this.onRemoveArea(grid.id, e));
             this.activeModel.layer.bringToFront();
             this.popup.remove();
             this.activeModel = null;
@@ -121,8 +157,27 @@ export class GridMapControl extends L.Control {
 
     init() {
         this.map.on("pm:create", this.onCreateGrid);
+        this.map.on("zoom", this.onZoom);
         this.drawGrids();
     }
+
+    onZoom = (e) => {
+        const zoom = this.map.getZoom();
+        if (zoom >= 15 && !this.isGridShowing) {
+            Array.from(this.grids, ([key, grid]) => {
+                const { markers } = grid;
+                markers.forEach((el) => el.setOpacity(1));
+            });
+
+            this.isGridShowing = true;
+        } else if (this.isGridShowing && zoom < 15) {
+            Array.from(this.grids, ([key, grid]) => {
+                const { markers } = grid;
+                markers.forEach((el) => el.setOpacity(0));
+            });
+            this.isGridShowing = false;
+        }
+    };
 
     getGrids = async () => {
         try {
@@ -143,15 +198,14 @@ export class GridMapControl extends L.Control {
 
     onRemoveArea = async (id) => {
         try {
-            const layers = this.grids.get(id);
+            const { layers, markers } = this.grids.get(id);
             if (layers) layers.forEach((layer) => layer.remove());
+            if (markers) markers.forEach((layer) => layer.remove());
             await deleteGrid(id);
         } catch (error) {
             console.error(error);
         }
     };
-
-    onClick = (grid, e) => {};
 
     async drawPolygon(grid) {
         const { coordinates } = grid;
